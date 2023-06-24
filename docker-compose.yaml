@@ -1,0 +1,80 @@
+version: '3.3'
+
+services:
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    ports:
+      - "3000:3000" # 3001 is the port on the host machine, 80 is the port inside the container
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:3001
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+  backend:
+    container_name: backend
+    build: ./backend
+    ports:
+      - "3001:3001"
+    environment:
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_HOST=db
+      - DB_DATABASE=test_db_pg
+      - DB_PORT=5432
+      - NODE_ENV=development
+    networks:
+      - app-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    container_name: postgres
+    image: postgres:latest
+    ports:
+      - "5431:5432"
+    volumes:
+      - ./pg-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=test_db_pg
+    networks:
+      - app-network
+    healthcheck:
+      # test to see if the service is healthy using variables postgres_user
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./certs:/etc/nginx/certs
+    networks:
+      - app-network
+    depends_on:
+      - frontend
+
+networks:
+  app-network:
+    driver: bridge
+
+
+
+    
+
+
+
+
+
+
