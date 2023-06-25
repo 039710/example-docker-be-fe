@@ -1,12 +1,12 @@
 # ignore all node_modules in folder backend, and frontend
 # ignore all .git in folder backend, and frontend
-
-
 backend/node_modules/
 backend/.git
+backend/.env
 frontend/node_modules
 frontend/.git
-
+frontend/.env
+certs/*
 # ignore all files in pg-data folder
 pg-data/*
 
